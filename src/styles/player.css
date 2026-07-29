@@ -1,0 +1,106 @@
+@font-face {
+  font-family: 'Inter Variable';
+  src: url('/fonts/inter_variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter Variable Italic';
+  src: url('/fonts/inter_variable_italic.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto Numbers';
+  src: url('/fonts/roboto_medium_numbers.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Rubik Variable';
+  src: url('/fonts/rubik_variable.ttf') format('truetype');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Scheherazade New';
+  src: url('/fonts/scheherazade_new_regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-quranify-bg-primary: #ece7de;
+  --color-quranify-scrim-60: rgba(43, 26, 16, 0.35);
+  --color-quranify-scrim-70: rgba(43, 26, 16, 0.50);
+  --color-quranify-bottom-bar-bg: rgba(253, 252, 251, 0.88);
+  --color-quranify-surface: #fdfcfb;
+  --color-quranify-surface-variant: #f5ebd6;
+
+  --color-quranify-text-primary: #2b1a10;
+  --color-quranify-text-secondary: #7f6a55;
+  --color-quranify-text-disabled: #a39282;
+
+  --color-quranify-accent-primary: #deab65;
+  --color-quranify-accent-secondary: #b88a4f;
+  --color-quranify-accent-variant: #c49a62;
+  --color-quranify-accent-deep: #8c6332;
+
+  --color-quranify-error: #c94a4a;
+  --color-quranify-live: #b88a4f;
+  --color-quranify-progress: #b88a4f;
+
+  --color-quranify-purple: #b88a4f;
+  --color-quranify-notification-bg: #f5ebd6;
+  --color-quranify-glass-tint: rgba(253, 252, 251, 0.85);
+
+  --font-player-primary: "Thmanyah Sans", system-ui, sans-serif;
+  --font-player-primary-italic: "Thmanyah Sans", system-ui, sans-serif;
+  --font-player-numbers: "Thmanyah Sans", monospace;
+  --font-player-heading: "Thmanyah Serif Display", Georgia, serif;
+  --font-player-quran: "KFGQPC Uthman Taha Naskh", "Amiri", serif;
+}
+
+/* Glassmorphism utilities for Sakeenah Cut-Crystal theme */
+.player-glass-container {
+  background: linear-gradient(180deg, rgba(253, 252, 251, 0.85) 0%, rgba(244, 240, 234, 0.72) 100%);
+  backdrop-filter: blur(26px) saturate(210%);
+  -webkit-backdrop-filter: blur(26px) saturate(210%);
+  border: 1px solid rgba(43, 26, 16, 0.09);
+  box-shadow: 0 16px 36px -12px rgba(43, 26, 16, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.90);
+}
+
+.player-glass-pill {
+  background: linear-gradient(180deg, rgba(253, 252, 251, 0.88) 0%, rgba(244, 240, 234, 0.75) 100%);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  border: 1px solid rgba(43, 26, 16, 0.10);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+  border-radius: 9999px;
+}
+
+.player-bottom-sheet {
+  background: rgba(253, 252, 251, 0.97);
+  backdrop-filter: blur(30px) saturate(210%);
+  -webkit-backdrop-filter: blur(30px) saturate(210%);
+  border-top: 1px solid rgba(43, 26, 16, 0.10);
+  box-shadow: 0 -10px 40px -10px rgba(43, 26, 16, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+}
+
+/* Hide scrollbar for sheets */
+.player-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.player-hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
