@@ -216,12 +216,19 @@ export function QuranAudioPlayerScreen({
   };
 
   // Video Background State
-  const TOTAL_BG_VIDEOS = 10;
+  const BG_VIDEOS = [
+    { id: 0, name: 'غابة', src: '/videos/1.mp4' },
+    { id: 1, name: 'غروب', src: '/videos/2.mp4' },
+    { id: 2, name: 'سحاب', src: '/videos/3.mp4' },
+    { id: 3, name: 'أمواج', src: '/videos/4.mp4' },
+    { id: 4, name: 'مطر', src: '/videos/5.mp4' },
+  ];
 
   const [bgVideoIndex, setBgVideoIndex] = useState<number | null>(() => {
     try {
       const saved = localStorage.getItem('quran_player_bg_video');
-      return saved !== null ? JSON.parse(saved) : null;
+      const parsed = saved !== null ? JSON.parse(saved) : null;
+      return typeof parsed === 'number' && parsed >= 0 && parsed < BG_VIDEOS.length ? parsed : null;
     } catch {
       return null;
     }
@@ -235,7 +242,8 @@ export function QuranAudioPlayerScreen({
     } catch {}
   };
 
-  const isVideoTheme = bgVideoIndex !== null;
+  const isVideoTheme = bgVideoIndex !== null && bgVideoIndex >= 0 && bgVideoIndex < BG_VIDEOS.length;
+  const currentBgVideoSrc = isVideoTheme ? BG_VIDEOS[bgVideoIndex!].src : null;
 
   // Time Formatting Helpers
   const formatTime = (seconds: number) => {
@@ -293,8 +301,8 @@ export function QuranAudioPlayerScreen({
         }`} 
       />
 
-      {bgVideoIndex !== null && (
-        <SeamlessBgVideo key={bgVideoIndex} src={`/videos/${bgVideoIndex + 1}.mp4`} />
+      {currentBgVideoSrc && (
+        <SeamlessBgVideo key={bgVideoIndex} src={currentBgVideoSrc} />
       )}
 
       {/* Dynamic Contrast Scrims (Optical Shielding Overlay in video mode) */}
@@ -398,25 +406,29 @@ export function QuranAudioPlayerScreen({
                 <div className="flex-1 flex flex-col justify-between">
                   {/* Video Thumbnails Grid */}
                   <div className="flex-grow flex flex-col justify-center my-2">
-                    <p className="text-xs opacity-75 mb-2.5 text-right font-medium">اختر مظهر الخلفية المناسب:</p>
-                    <div className="grid grid-cols-5 gap-2">
-                      {Array.from({ length: TOTAL_BG_VIDEOS }, (_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => { selectBgVideo(i); setActiveSheet(null); }}
-                          className={`aspect-square rounded-xl flex items-center justify-center font-bold text-sm transition-all cursor-pointer active:scale-95 ${
-                            bgVideoIndex === i
-                              ? isVideoTheme
-                                ? 'bg-white/20 border border-white/60 text-white font-extrabold shadow-sm scale-105'
-                                : 'bg-gradient-to-br from-[#deab65] to-[#b88a4f] text-white border border-[#c49a62]/40 font-extrabold shadow-sm scale-105'
-                              : isVideoTheme
-                                ? 'liquid-glass-button text-white hover:bg-white/20'
-                                : 'bg-[#2b1a10]/05 border border-[#2b1a10]/08 text-[#2b1a10] hover:bg-[#b88a4f]/10 hover:border-[#b88a4f]/30 hover:text-[#b88a4f]'
-                          }`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
+                    <p className="text-xs opacity-75 mb-3 text-right font-medium">اختر مظهر الخلفية المناسب:</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {BG_VIDEOS.map((video) => {
+                        const isSelected = bgVideoIndex === video.id;
+                        return (
+                          <button
+                            key={video.id}
+                            onClick={() => { selectBgVideo(video.id); setActiveSheet(null); }}
+                            className={`py-3 px-3 rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-all cursor-pointer active:scale-95 ${
+                              isSelected
+                                ? isVideoTheme
+                                  ? 'bg-white/25 border border-white/60 text-white font-extrabold shadow-sm scale-[1.02]'
+                                  : 'bg-gradient-to-br from-[#deab65] to-[#b88a4f] text-white border border-[#c49a62]/40 font-extrabold shadow-sm scale-[1.02]'
+                                : isVideoTheme
+                                  ? 'liquid-glass-button text-white hover:bg-white/20'
+                                  : 'bg-[#2b1a10]/05 border border-[#2b1a10]/08 text-[#2b1a10] hover:bg-[#b88a4f]/10 hover:border-[#b88a4f]/30 hover:text-[#b88a4f]'
+                            }`}
+                          >
+                            <Film size={15} className="shrink-0 opacity-80" />
+                            <span>{video.name}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
