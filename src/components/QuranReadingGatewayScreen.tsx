@@ -223,12 +223,33 @@ export default function QuranReadingGatewayScreen({
       <div className="absolute top-[-20%] left-[-10%] w-[300px] h-[300px] bg-[#b88a4f]/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[250px] h-[250px] bg-[#deab65]/5 rounded-full blur-[100px] pointer-events-none" />
 
+      {/* Global Backdrop for Top Bar Dropdowns */}
+      <AnimatePresence>
+        {(isModeDropdownOpen || isFilterDropdownOpen) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-30 cursor-default bg-black/5"
+            onClick={() => {
+              setIsModeDropdownOpen(false);
+              setIsFilterDropdownOpen(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Floating Top Elements */}
-      <div className="fixed top-6 left-6 right-6 flex items-center justify-between z-40 pointer-events-none">
+      <div className="fixed top-6 left-6 right-6 h-10 flex flex-row items-center justify-between flex-nowrap z-40 pointer-events-none">
         {/* Right Element (in RTL): Quran Capsule with Apple UI Dropdown */}
-        <div className="relative pointer-events-auto">
+        <div className="relative shrink-0 h-10 flex items-center pointer-events-auto">
           <button
-            onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)}
+            type="button"
+            onClick={() => {
+              setIsModeDropdownOpen((prev) => !prev);
+              setIsFilterDropdownOpen(false);
+            }}
             className="bg-[#f7f2ea]/95 backdrop-blur-md px-4.5 h-10 rounded-full shadow-[0_8px_24px_rgba(43,26,16,0.08)] border border-[#e6dccf] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-[0.97] hover:bg-[#fdfcfb]"
           >
             <span className="text-[14px] font-bold text-[#2b1a10] whitespace-nowrap pt-0.5">
@@ -243,52 +264,54 @@ export default function QuranReadingGatewayScreen({
           {/* Mode Dropdown */}
           <AnimatePresence>
             {isModeDropdownOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-30 cursor-default"
-                  onClick={() => setIsModeDropdownOpen(false)}
-                />
-                <motion.div
-                  initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.96 }}
-                  transition={{ duration: 0.12, ease: "easeOut" }}
-                  className="absolute right-0 mt-2 w-44 bg-[#fdfcfb]/95 backdrop-blur-xl rounded-[20px] border border-[#e6dccf] shadow-[0_12px_28px_rgba(43,26,16,0.12)] z-40 overflow-hidden py-1"
+              <motion.div
+                initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                style={{ position: "absolute", top: "calc(100% + 8px)", right: 0 }}
+                className="w-44 max-w-[calc(100vw-48px)] bg-[#fdfcfb]/95 backdrop-blur-xl rounded-[20px] border border-[#e6dccf] shadow-[0_12px_28px_rgba(43,26,16,0.12)] z-50 overflow-hidden py-1 origin-top-right text-right"
+                dir="rtl"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsModeDropdownOpen(false);
+                    onModeChange("listening");
+                  }}
+                  className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
                 >
-                  <button
-                    onClick={() => {
-                      setIsModeDropdownOpen(false);
-                      onModeChange("listening");
-                    }}
-                    className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
-                  >
-                    <span className="text-[13px] font-bold">الاستماع</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsModeDropdownOpen(false);
-                      onModeChange("reading");
-                    }}
-                    className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
-                  >
-                    <span className="text-[13px] font-bold text-[#b88a4f]">
-                      القرآن الكريم
-                    </span>
-                    <Check size={14} className="text-[#b88a4f] shrink-0" />
-                  </button>
-                </motion.div>
-              </>
+                  <span className="text-[13px] font-bold">الاستماع</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsModeDropdownOpen(false);
+                    onModeChange("reading");
+                  }}
+                  className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
+                >
+                  <span className="text-[13px] font-bold text-[#b88a4f]">
+                    القرآن الكريم
+                  </span>
+                  <Check size={14} className="text-[#b88a4f] shrink-0" />
+                </button>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
 
         {/* Left Element: Quick stats dropdown indicator for filters */}
-        <div className="relative pointer-events-auto">
+        <div className="relative shrink-0 h-10 flex items-center pointer-events-auto">
           <button
-            onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-            className="bg-[#f7f2ea]/95 backdrop-blur-md px-4 h-10 rounded-full shadow-[0_8px_24px_rgba(43,26,16,0.08)] border border-[#e6dccf] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-[0.97] hover:bg-[#fdfcfb]"
+            type="button"
+            onClick={() => {
+              setIsFilterDropdownOpen((prev) => !prev);
+              setIsModeDropdownOpen(false);
+            }}
+            className="bg-[#f7f2ea]/95 backdrop-blur-md px-4 h-10 rounded-full shadow-[0_8px_24px_rgba(43,26,16,0.08)] border border-[#e6dccf] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-[0.97] hover:bg-[#fdfcfb] shrink-0 max-w-[160px]"
           >
-            <span className="text-[12.5px] text-[#7f6a55] font-bold whitespace-nowrap pt-0.5">
+            <span className="text-[12.5px] text-[#7f6a55] font-bold whitespace-nowrap pt-0.5 truncate">
               {statsLabel}
             </span>
             <ChevronDown
@@ -300,43 +323,40 @@ export default function QuranReadingGatewayScreen({
           {/* Filter Dropdown */}
           <AnimatePresence>
             {isFilterDropdownOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-30 cursor-default"
-                  onClick={() => setIsFilterDropdownOpen(false)}
-                />
-                <motion.div
-                  initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.96 }}
-                  transition={{ duration: 0.12, ease: "easeOut" }}
-                  className="absolute left-0 mt-2 w-36 bg-[#fdfcfb]/95 backdrop-blur-xl rounded-[20px] border border-[#e6dccf] shadow-[0_12px_28px_rgba(43,26,16,0.12)] z-40 overflow-hidden py-1"
-                >
-                  {[
-                    { id: "all", label: "الكل" },
-                    { id: "meccan", label: "مكية" },
-                    { id: "medinan", label: "مدنية" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => {
-                        setSelectedTypeFilter(opt.id as any);
-                        setIsFilterDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
+              <motion.div
+                initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                style={{ position: "absolute", top: "calc(100% + 8px)", left: 0 }}
+                className="w-36 max-w-[calc(100vw-48px)] bg-[#fdfcfb]/95 backdrop-blur-xl rounded-[20px] border border-[#e6dccf] shadow-[0_12px_28px_rgba(43,26,16,0.12)] z-50 overflow-hidden py-1 origin-top-left text-right"
+                dir="rtl"
+              >
+                {[
+                  { id: "all", label: "الكل" },
+                  { id: "meccan", label: "مكية" },
+                  { id: "medinan", label: "مدنية" },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTypeFilter(opt.id as any);
+                      setIsFilterDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
+                  >
+                    <span
+                      className={`text-[13px] ${selectedTypeFilter === opt.id ? "font-bold text-[#b88a4f]" : "font-medium"}`}
                     >
-                      <span
-                        className={`text-[13px] ${selectedTypeFilter === opt.id ? "font-bold text-[#b88a4f]" : "font-medium"}`}
-                      >
-                        {opt.label}
-                      </span>
-                      {selectedTypeFilter === opt.id && (
-                        <Check size={14} className="text-[#b88a4f] shrink-0" />
-                      )}
-                    </button>
-                  ))}
-                </motion.div>
-              </>
+                      {opt.label}
+                    </span>
+                    {selectedTypeFilter === opt.id && (
+                      <Check size={14} className="text-[#b88a4f] shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

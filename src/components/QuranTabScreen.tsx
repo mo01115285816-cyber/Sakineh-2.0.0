@@ -558,7 +558,7 @@ const QuranTabScreen = React.memo(function QuranTabScreen({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", damping: 26, stiffness: 280 }}
-              className="fixed inset-0 z-50  overflow-hidden"
+              className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-50 overflow-hidden shadow-2xl"
             >
               <QuranAudioPlayerScreen
                 audioRef={audioRef}

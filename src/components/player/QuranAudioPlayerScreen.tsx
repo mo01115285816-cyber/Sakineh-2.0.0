@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { SeamlessBgVideo } from './SeamlessBgVideo';
 import { 
   ChevronDown, 
   Star, 
@@ -25,6 +26,8 @@ import {
   VideoOff,
   Film
 } from 'lucide-react';
+import { surahNames } from "@/data/surahNames";
+import { vocalizedSurahNames } from "@/data/vocalizedSurahNames";
 
 // Transliterated English Names for Surahs
 const SURAH_TRANSLITERATIONS: Record<number, string> = {
@@ -51,33 +54,6 @@ const SURAH_TRANSLITERATIONS: Record<number, string> = {
   101: "Al-Qari'ah", 102: "At-Takathur", 103: "Al-'Asr", 104: "Al-Humazah", 105: "Al-Fil",
   106: "Quraysh", 107: "Al-Ma'un", 108: "Al-Kawthar", 109: "Al-Kafirun", 110: "An-Nasr",
   111: "Al-Masad", 112: "Al-Ikhlas", 113: "Al-Falaq", 114: "An-Nas"
-};
-
-// Arabic Surah Names
-const ARABIC_SURAH_NAMES: Record<number, string> = {
-  1: "الفاتحة", 2: "البقرة", 3: "آل عمران", 4: "النساء", 5: "المائدة",
-  6: "الأنعام", 7: "الأعراف", 8: "الأنفال", 9: "التوبة", 10: "يونس",
-  11: "هود", 12: "يوسف", 13: "الرعد", 14: "إبراهيم", 15: "الحجر",
-  16: "النحل", 17: "الإسراء", 18: "الكهف", 19: "مريم", 20: "طه",
-  21: "الأنبيائ", 22: "الحج", 23: "المؤمنون", 24: "النور", 25: "الفرقان",
-  26: "الشعراء", 27: "النمل", 28: "القصص", 29: "العنكبوت", 30: "الروم",
-  31: "لقمان", 32: "السجدة", 33: "الأحزاب", 34: "سبأ", 35: "فاطر",
-  36: "يس", 37: "الصافات", 38: "ص", 39: "الزمر", 40: "غافر",
-  41: "فصلت", 42: "الشورى", 43: "الزخرف", 44: "الدخان", 45: "الجاثية",
-  46: "الأحقاف", 47: "محمد", 48: "الفتح", 49: "الحجرات", 50: "ق",
-  51: "الذاريات", 52: "الطور", 53: "النجم", 54: "القمر", 55: "الرحمن",
-  56: "الواقعة", 57: "الحديد", 58: "المجادلة", 59: "الحشر", 60: "الممتحنة",
-  61: "الصف", 62: "الجمعة", 63: "المنافقون", 64: "التغابن", 65: "الطلاق",
-  66: "التحريم", 67: "الملك", 68: "القلم", 69: "الحاقة", 70: "المعارج",
-  71: "نوح", 72: "الجن", 73: "المزمل", 74: "المدثر", 75: "القيامة",
-  76: "الإنسان", 77: "المرسلات", 78: "النبأ", 79: "النازعات", 80: "عبس",
-  81: "التكوير", 82: "الإنفطار", 83: "المطففين", 84: "الإنشقاق", 85: "البروج",
-  86: "الطارق", 87: "الأعلى", 88: "الغاشية", 89: "الفجر", 90: "البلد",
-  91: "الشمس", 92: "الليل", 93: "الضحى", 94: "الشرح", 95: "التين",
-  96: "العلق", 97: "القدر", 98: "البينة", 99: "الزلزلة", 100: "العاديات",
-  101: "القارعة", 102: "التكاثر", 103: "العصر", 104: "الهمزة", 105: "الفيل",
-  106: "قريش", 107: "الماعون", 108: "الكوثر", 109: "الكافرون", 110: "النصر",
-  111: "المسد", 112: "الإخلاص", 113: "الفلق", 114: "الناس"
 };
 
 interface Props {
@@ -283,8 +259,8 @@ export function QuranAudioPlayerScreen({
 
   // Reciter Photo Resolution
   const reciterPhoto = reciter.photoUrl || reciter.photo || "/images/quran_artwork.jpg";
-  const transliteratedName = SURAH_TRANSLITERATIONS[surahId] || `Surah ${surahId}`;
-  const arabicName = ARABIC_SURAH_NAMES[surahId] || `سورة ${surahId}`;
+  const arabicName = surahNames[surahId] || `سورة ${surahId}`;
+  const vocalizedName = vocalizedSurahNames[surahId] || `سُورَةُ ${arabicName}`;
 
   // Surah list for Queue card
   const availableSurahs = useMemo(() => {
@@ -297,8 +273,9 @@ export function QuranAudioPlayerScreen({
     const q = searchQuery.trim().toLowerCase();
     return availableSurahs.filter(sId => {
       const eng = (SURAH_TRANSLITERATIONS[sId] || '').toLowerCase();
-      const arb = ARABIC_SURAH_NAMES[sId] || '';
-      return eng.includes(q) || arb.includes(q) || sId.toString().includes(q);
+      const arb = (surahNames[sId] || '').toLowerCase();
+      const voc = (vocalizedSurahNames[sId] || '').toLowerCase();
+      return eng.includes(q) || arb.includes(q) || voc.includes(q) || sId.toString().includes(q);
     });
   }, [availableSurahs, searchQuery]);
 
@@ -317,17 +294,17 @@ export function QuranAudioPlayerScreen({
       />
 
       {bgVideoIndex !== null && (
-        <video
-          key={bgVideoIndex}
-          className="absolute inset-0 -z-10 w-full h-full object-cover pointer-events-none"
-          src={`/videos/${bgVideoIndex + 1}.mp4`}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          onError={(e) => console.warn('Background video failed to load:', e.currentTarget.src)}
-        />
+        <SeamlessBgVideo key={bgVideoIndex} src={`/videos/${bgVideoIndex + 1}.mp4`} />
+      )}
+
+      {/* Dynamic Contrast Scrims (Optical Shielding Overlay in video mode) */}
+      {isVideoTheme && (
+        <>
+          {/* Top-down scrim (protects Header and Dropdown) - Soft and elegant */}
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/25 to-transparent pointer-events-none z-0" />
+          {/* Bottom-up scrim (protects Metadata, seek, controls, and footer) - Lowered to 42% height and soft opacity */}
+          <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-black/40 via-black/12 to-transparent pointer-events-none z-0" />
+        </>
       )}
 
       {/* Top Ambient Light Glow Overlay (Static mode only) */}
@@ -345,8 +322,8 @@ export function QuranAudioPlayerScreen({
 
       {/* ─────────────────── TOP BAR ─────────────────── */}
       <header className="relative z-10 pt-3 px-6 flex flex-col items-center shrink-0">
-        {/* Swipe Handle Indicator Bar */}
-        <button 
+         {/* Swipe Handle Indicator Bar */}
+         <button 
           onClick={onClose}
           aria-label="Close player"
           className={`w-12 h-1 rounded-full cursor-pointer transition-colors mb-3.5 ${
@@ -357,154 +334,273 @@ export function QuranAudioPlayerScreen({
         {/* Top Dropdown Pill ("الخلفيات") */}
         <button
           onClick={() => setActiveSheet(activeSheet === 'ambient' ? null : 'ambient')}
-          className={`hover:opacity-90 active:scale-95 transition-all border rounded-full px-5 py-2 font-bold text-sm flex items-center gap-2 shadow-md cursor-pointer backdrop-blur-md ${
+          className={`hover:opacity-90 active:scale-95 transition-all rounded-full px-5 py-2 font-sans font-bold text-sm flex items-center gap-2 cursor-pointer ${
             isVideoTheme
-              ? 'bg-white/12 border-white/30 text-white saturate-[180%] brightness-[1.1]'
+              ? 'liquid-glass-capsule text-white optical-shadow-guard'
               : 'cut-crystal-capsule border-[#2b1a10]/10 text-[#2b1a10]'
           }`}
           dir="rtl"
         >
-          <span className="text-[14px] font-bold tracking-wide">
+          <span className="text-[14px] font-sans font-bold tracking-wide">
             الخلفيات
           </span>
-          <ChevronDown size={16} className={isVideoTheme ? "text-white" : "text-[#b88a4f]"} />
+          <ChevronDown size={16} className={isVideoTheme ? "text-white/80" : "text-[#b88a4f]"} />
         </button>
       </header>
+
+
+      {/* ─────────────────── FLOATING BACKGROUND VIDEO CARD (الخلفيات) ─────────────────── */}
+      <AnimatePresence>
+        {activeSheet === 'ambient' && (
+          <>
+            {/* Transparent click-outside overlay without dark blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              onClick={() => setActiveSheet(null)}
+              className="fixed inset-0 z-30 pointer-events-auto"
+            />
+            {/* Perfectly centered flex layout container to prevent translation clashing */}
+            <div className="absolute inset-x-0 top-[56px] bottom-[270px] z-40 flex items-center justify-center pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: -6 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -6 }}
+                transition={{ type: "spring", stiffness: 600, damping: 38 }}
+                className={`w-[calc(100%-32px)] max-w-[360px] h-full max-h-[410px] rounded-[32px] p-4.5 flex flex-col pointer-events-auto will-change-transform font-sans ${
+                  isVideoTheme
+                    ? 'liquid-glass-card text-white'
+                    : 'cut-crystal-panel text-[#2b1a10]'
+                }`}
+                dir="rtl"
+              >
+                {/* Top Header */}
+                <div className="flex items-center justify-between pb-3 border-b border-current/10 mb-3 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={18} className={isVideoTheme ? "text-white" : "text-[#b88a4f]"} />
+                    <h3 className={`text-base font-display font-bold ${isVideoTheme ? 'text-white' : 'text-[#2b1a10]'}`}>
+                      خلفيات الشاشة
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setActiveSheet(null)}
+                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                      isVideoTheme ? 'bg-white/10 text-white/80 hover:text-white' : 'bg-[#2b1a10]/05 text-[#7f6a55] hover:text-[#2b1a10] hover:bg-[#b88a4f]/10'
+                    }`}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* Scrollable / Flexible content area */}
+                <div className="flex-1 flex flex-col justify-between">
+                  {/* Video Thumbnails Grid */}
+                  <div className="flex-grow flex flex-col justify-center my-2">
+                    <p className="text-xs opacity-75 mb-2.5 text-right font-medium">اختر مظهر الخلفية المناسب:</p>
+                    <div className="grid grid-cols-5 gap-2">
+                      {Array.from({ length: TOTAL_BG_VIDEOS }, (_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => { selectBgVideo(i); setActiveSheet(null); }}
+                          className={`aspect-square rounded-xl flex items-center justify-center font-bold text-sm transition-all cursor-pointer active:scale-95 ${
+                            bgVideoIndex === i
+                              ? isVideoTheme
+                                ? 'bg-white/20 border border-white/60 text-white font-extrabold shadow-sm scale-105'
+                                : 'bg-gradient-to-br from-[#deab65] to-[#b88a4f] text-white border border-[#c49a62]/40 font-extrabold shadow-sm scale-105'
+                              : isVideoTheme
+                                ? 'liquid-glass-button text-white hover:bg-white/20'
+                                : 'bg-[#2b1a10]/05 border border-[#2b1a10]/08 text-[#2b1a10] hover:bg-[#b88a4f]/10 hover:border-[#b88a4f]/30 hover:text-[#b88a4f]'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Turn Off Video Button at the very bottom */}
+                  <button
+                    onClick={() => { selectBgVideo(null); setActiveSheet(null); }}
+                    className={`w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all shrink-0 ${
+                      isVideoTheme
+                        ? 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20'
+                        : 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100'
+                    }`}
+                  >
+                    <VideoOff size={15} />
+                    إيقاف الفيديو
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
 
 
       {/* ─────────────────── FLOATING QUEUE CARD (متابعة التشغيل) ─────────────────── */}
       <AnimatePresence>
         {activeSheet === 'queue' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -8 }}
-            transition={{ type: "spring", stiffness: 350, damping: 28 }}
-            className={`absolute top-[72px] inset-x-5 z-40 rounded-[30px] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex flex-col h-[285px] sm:h-[300px] backdrop-blur-2xl border ${
-              isVideoTheme
-                ? 'bg-white/12 border-white/30 text-white saturate-[180%] brightness-[1.1]'
-                : 'bg-[#fdfcfb]/98 border-[#2b1a10]/10 text-[#2b1a10]'
-            }`}
-            dir="rtl"
-          >
-            {/* Header Row: Title on right, Action Buttons on left */}
-            <div className="flex items-center justify-between mb-2.5 px-1">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    if (onSetRepeatMode) {
-                      const nextMode = repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none';
-                      onSetRepeatMode(nextMode);
-                    }
-                  }}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                    repeatMode !== 'none' 
-                      ? 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white font-bold shadow-sm' 
-                      : isVideoTheme ? 'bg-white/10 text-white' : 'cut-crystal-capsule text-[#7f6a55]'
-                  }`}
-                  aria-label="Repeat mode"
-                >
-                  {repeatMode === 'one' ? <Repeat1 size={15} /> : <Repeat size={15} />}
-                </button>
-
-                <button
-                  onClick={() => setIsShuffle(!isShuffle)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                    isShuffle 
-                      ? 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white font-bold shadow-sm' 
-                      : isVideoTheme ? 'bg-white/10 text-white' : 'cut-crystal-capsule text-[#7f6a55]'
-                  }`}
-                  aria-label="Shuffle"
-                >
-                  <Shuffle size={15} />
-                </button>
-              </div>
-
-              <h3 className={`text-lg font-bold tracking-wide ${isVideoTheme ? 'text-white' : 'text-[#2b1a10]'}`}>
-                متابعة التشغيل
-              </h3>
-            </div>
-
-            {/* Fully Rounded Search Bar */}
-            <div className="relative w-full mb-2.5">
-              <input
-                type="text"
-                placeholder="بحث"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full py-2 pr-9 pl-4 text-sm rounded-full focus:outline-none transition-colors text-right ${
+          <>
+            {/* Transparent click-outside overlay without dark blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              onClick={() => setActiveSheet(null)}
+              className="fixed inset-0 z-30 pointer-events-auto"
+            />
+            {/* Perfectly centered flex layout container to prevent translation clashing */}
+            <div className="absolute inset-x-0 top-[56px] bottom-[270px] z-40 flex items-center justify-center pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: -6 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -6 }}
+                transition={{ type: "spring", stiffness: 600, damping: 38 }}
+                className={`w-[calc(100%-32px)] max-w-[360px] h-full max-h-[410px] rounded-[32px] p-4.5 flex flex-col pointer-events-auto will-change-transform font-sans ${
                   isVideoTheme
-                    ? 'bg-white/10 border border-white/20 text-white placeholder-white/50'
-                    : 'cut-crystal-input text-[#2b1a10] placeholder-[#7f6a55]/60'
+                    ? 'liquid-glass-card text-white'
+                    : 'cut-crystal-panel text-[#2b1a10]'
                 }`}
-              />
-              <Search size={15} className="absolute right-3.5 top-2.5 text-[#b88a4f] pointer-events-none" />
-            </div>
-
-            {/* Scrollable Container */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-0.5 custom-scrollbar">
-              {filteredSurahs.map((sId) => {
-                const isCurrent = sId === surahId;
-                const sArabic = ARABIC_SURAH_NAMES[sId] || `سورة ${sId}`;
-                const sEnglish = SURAH_TRANSLITERATIONS[sId] || `Surah ${sId}`;
-
-                if (isCurrent) {
-                  return (
-                    <div
-                      key={sId}
-                      className="w-full p-2.5 rounded-2xl bg-[#f5ebd6] border border-[#c49a62] flex items-center justify-between text-[#2b1a10] shadow-sm"
+                dir="rtl"
+              >
+                {/* Header Row: Title on right, Action Buttons on left */}
+                <div className="flex items-center justify-between mb-2.5 px-1 shrink-0">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => {
+                        if (onSetRepeatMode) {
+                          const nextMode = repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none';
+                          onSetRepeatMode(nextMode);
+                        }
+                      }}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95 cursor-pointer ${
+                        repeatMode !== 'none' 
+                          ? isVideoTheme
+                            ? 'bg-white text-black font-bold shadow-sm'
+                            : 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white font-bold shadow-sm' 
+                          : isVideoTheme ? 'liquid-glass-button text-white/80' : 'bg-[#2b1a10]/05 text-[#7f6a55] hover:text-[#2b1a10] hover:bg-[#b88a4f]/10 border border-[#2b1a10]/05'
+                      }`}
+                      aria-label="Repeat mode"
                     >
-                      <button
-                        onClick={onTogglePlay}
-                        className="w-8 h-8 rounded-full bg-gradient-to-br from-[#deab65] to-[#b88a4f] text-white flex items-center justify-center active:scale-95 transition-transform shrink-0 shadow-xs"
-                      >
-                        {isPlaying ? <Pause size={15} className="fill-white" /> : <Play size={15} className="fill-white translate-x-[0.5px]" />}
-                      </button>
+                      {repeatMode === 'one' ? <Repeat1 size={15} /> : <Repeat size={15} />}
+                    </button>
 
-                      <div className="flex-1 text-right px-3 min-w-0">
-                        <p className="text-base font-bold text-[#2b1a10] leading-snug truncate">{sEnglish}</p>
-                        <p className="text-xs text-[#7f6a55] font-bold truncate">{sArabic}</p>
-                      </div>
+                    <button
+                      onClick={() => setIsShuffle(!isShuffle)}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95 cursor-pointer ${
+                        isShuffle 
+                          ? isVideoTheme
+                            ? 'bg-white text-black font-bold shadow-sm'
+                            : 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white font-bold shadow-sm' 
+                          : isVideoTheme ? 'liquid-glass-button text-white/80' : 'bg-[#2b1a10]/05 text-[#7f6a55] hover:text-[#2b1a10] hover:bg-[#b88a4f]/10 border border-[#2b1a10]/05'
+                      }`}
+                      aria-label="Shuffle"
+                    >
+                      <Shuffle size={15} />
+                    </button>
+                  </div>
 
-                      <div className="w-11 h-11 rounded-2xl bg-[#ece7de] border border-[#2b1a10]/08 flex items-center justify-center shrink-0">
-                        <div className="flex items-center gap-0.5 text-[#b88a4f]">
-                          <div className="w-0.5 h-3 bg-[#b88a4f] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-0.5 h-4 bg-[#b88a4f] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-0.5 h-2.5 bg-[#b88a4f] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                          <div className="w-0.5 h-3.5 bg-[#b88a4f] rounded-full animate-bounce" style={{ animationDelay: '450ms' }} />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
+                  <h3 className={`text-base font-display font-bold tracking-wide ${isVideoTheme ? 'text-white' : 'text-[#2b1a10]'}`}>
+                    متابعة التشغيل
+                  </h3>
+                </div>
 
-                return (
-                  <button
-                    key={sId}
-                    onClick={() => {
-                      if (onPlaySurah) {
-                        onPlaySurah(sId, availableSurahs);
-                      }
-                    }}
-                    className={`w-full p-2.5 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${
+                {/* Fully Rounded Search Bar */}
+                <div className="relative w-full mb-2.5 shrink-0">
+                  <input
+                    type="text"
+                    placeholder="بحث"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`w-full py-2 pr-9 pl-4 text-sm rounded-full focus:outline-none transition-colors text-right font-sans ${
                       isVideoTheme
-                        ? 'hover:bg-white/10 text-white'
-                        : 'hover:bg-[#2b1a10]/5 text-[#2b1a10]'
+                        ? 'liquid-glass-input text-white placeholder-white/60'
+                        : 'cut-crystal-input text-[#2b1a10] placeholder-[#7f6a55]/60'
                     }`}
-                  >
-                    <div className="w-8 h-8 shrink-0" />
-                    <div className="flex-1 text-right px-3 min-w-0">
-                      <p className="text-base font-bold leading-snug truncate">{sEnglish}</p>
-                      <p className={`text-xs font-medium truncate ${isVideoTheme ? 'text-white/70' : 'text-[#7f6a55]'}`}>{sArabic}</p>
-                    </div>
-                    <div className="w-11 h-11 rounded-2xl bg-[#f5ebd6] border border-[#2b1a10]/08 flex items-center justify-center text-lg font-bold text-[#b88a4f] shrink-0">
-                      {sId}
-                    </div>
-                  </button>
-                );
-              })}
+                  />
+                  <Search size={15} className={`absolute right-3.5 top-2.5 pointer-events-none ${isVideoTheme ? 'text-white/60' : 'text-[#b88a4f]'}`} />
+                </div>
+
+                {/* Scrollable Container */}
+                <div className="flex-1 overflow-y-auto space-y-1.5 pr-0.5 custom-scrollbar">
+                  {filteredSurahs.map((sId) => {
+                    const isCurrent = sId === surahId;
+                    const sArabic = surahNames[sId] || `سورة ${sId}`;
+                    const sVocalized = vocalizedSurahNames[sId] || `سُورَةُ ${sArabic}`;
+
+                    if (isCurrent) {
+                      return (
+                        <div
+                          key={sId}
+                          className={`w-full p-2.5 rounded-2xl flex items-center justify-between shadow-sm transition-all font-sans ${
+                            isVideoTheme
+                              ? 'bg-white/15 border border-white/25 text-white shadow-[inset_0_1px_rgba(255,255,255,0.20)]'
+                              : 'bg-[#f5ebd6] border border-[#c49a62] text-[#2b1a10] shadow-[0_4px_12px_rgba(43,26,16,0.06)]'
+                          }`}
+                        >
+                          <button
+                            onClick={onTogglePlay}
+                            className="w-8 h-8 rounded-full bg-gradient-to-br from-[#deab65] to-[#b88a4f] text-white flex items-center justify-center active:scale-95 transition-transform shrink-0 shadow-xs cursor-pointer"
+                          >
+                            {isPlaying ? <Pause size={15} className="fill-white" /> : <Play size={15} className="fill-white translate-x-[0.5px]" />}
+                          </button>
+
+                          <div className="flex-1 text-right px-3 min-w-0">
+                            <p className={`text-sm font-bold leading-snug truncate ${isVideoTheme ? 'text-white' : 'text-[#2b1a10]'}`}>{sVocalized}</p>
+                            <p className={`text-xs font-bold truncate ${isVideoTheme ? 'text-white/70' : 'text-[#7f6a55]'}`}>{sArabic}</p>
+                          </div>
+
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                            isVideoTheme ? 'bg-white/10 border-white/10' : 'bg-[#ece7de] border-[#2b1a10]/08'
+                          }`}>
+                            <div className={`flex items-center gap-0.5 ${isVideoTheme ? 'text-white' : 'text-[#b88a4f]'}`}>
+                              <div className={`w-0.5 h-3 rounded-full animate-bounce ${isVideoTheme ? 'bg-white' : 'bg-[#b88a4f]'}`} style={{ animationDelay: '0ms' }} />
+                              <div className={`w-0.5 h-4 rounded-full animate-bounce ${isVideoTheme ? 'bg-white' : 'bg-[#b88a4f]'}`} style={{ animationDelay: '150ms' }} />
+                              <div className={`w-0.5 h-2.5 rounded-full animate-bounce ${isVideoTheme ? 'bg-white' : 'bg-[#b88a4f]'}`} style={{ animationDelay: '300ms' }} />
+                              <div className={`w-0.5 h-3.5 rounded-full animate-bounce ${isVideoTheme ? 'bg-white' : 'bg-[#b88a4f]'}`} style={{ animationDelay: '450ms' }} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <button
+                        key={sId}
+                        onClick={() => {
+                          if (onPlaySurah) {
+                            onPlaySurah(sId, availableSurahs);
+                          }
+                        }}
+                        className={`w-full p-2.5 rounded-2xl flex items-center justify-between transition-all cursor-pointer group font-sans ${
+                          isVideoTheme
+                            ? 'hover:bg-white/15 text-white'
+                            : 'hover:bg-[#b88a4f]/08 text-[#2b1a10] hover:text-[#b88a4f]'
+                        }`}
+                      >
+                        <div className="w-8 h-8 shrink-0" />
+                        <div className="flex-1 text-right px-3 min-w-0">
+                          <p className="text-sm font-bold leading-snug truncate">{sVocalized}</p>
+                          <p className={`text-xs font-medium truncate ${isVideoTheme ? 'text-white/70' : 'text-[#7f6a55] group-hover:text-[#b88a4f]/80'}`}>{sArabic}</p>
+                        </div>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shrink-0 border transition-all ${
+                          isVideoTheme
+                            ? 'bg-white/10 border-white/10 text-white/90'
+                            : 'bg-[#f5ebd6] border-[#2b1a10]/08 text-[#b88a4f] group-hover:bg-[#b88a4f] group-hover:text-white group-hover:border-transparent group-hover:shadow-xs'
+                        }`}>
+                          {sId}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
             </div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
 
@@ -516,24 +612,24 @@ export function QuranAudioPlayerScreen({
           {/* Favorite Button */}
           <button
             onClick={toggleFavorite}
-            className={`w-9 h-9 flex items-center justify-center rounded-full transition-all shadow-sm shrink-0 cursor-pointer active:scale-95 backdrop-blur-md ${
-              isVideoTheme ? 'bg-white/12 border border-white/30 text-white saturate-[180%] brightness-[1.1]' : 'cut-crystal-capsule'
+            className={`w-9 h-9 flex items-center justify-center rounded-full transition-all shrink-0 cursor-pointer active:scale-95 ${
+              isVideoTheme ? 'liquid-glass-button text-white' : 'cut-crystal-capsule shadow-sm backdrop-blur-md'
             }`}
             aria-label="Favorite surah"
           >
             <Star 
               size={16} 
-              className={isFavorite ? "fill-[#deab65] text-[#b88a4f] drop-shadow-xs" : isVideoTheme ? "text-white/70" : "text-[#7f6a55]"} 
+              className={isFavorite ? (isVideoTheme ? "fill-white text-white optical-shadow-guard" : "fill-[#deab65] text-[#b88a4f] drop-shadow-xs") : isVideoTheme ? "text-white/70" : "text-[#7f6a55]"} 
             />
           </button>
 
           {/* Title & Sheikh Info */}
           <div className="flex items-center gap-4 text-right">
             <div className="flex flex-col items-end">
-              <h2 className={`text-2xl sm:text-3xl font-bold tracking-tight leading-tight ${isVideoTheme ? 'text-white drop-shadow-md' : 'text-[#2b1a10]'}`}>
-                {transliteratedName}
+              <h2 className={`text-2xl sm:text-3xl font-display font-bold tracking-tight leading-tight ${isVideoTheme ? 'text-white optical-shadow-guard' : 'text-[#2b1a10]'}`}>
+                {vocalizedName}
               </h2>
-              <p className={`text-[15px] sm:text-[16px] font-bold font-sans mt-0.5 ${isVideoTheme ? 'text-amber-200/90 drop-shadow-sm' : 'text-[#7f6a55]'}`} dir="rtl">
+              <p className={`text-[15px] sm:text-[16px] font-bold font-sans mt-0.5 ${isVideoTheme ? 'text-white/75 optical-shadow-guard' : 'text-[#7f6a55]'}`} dir="rtl">
                 {reciter.name}
               </p>
             </div>
@@ -561,7 +657,7 @@ export function QuranAudioPlayerScreen({
             onClick={() => setActiveSheet(activeSheet === 'timer' ? null : 'timer')}
             className={`transition-all active:scale-90 cursor-pointer flex items-center justify-center relative ${
               isVideoTheme 
-                ? 'p-2 text-[#deab65] hover:text-white drop-shadow-md' 
+                ? 'p-2 text-white/95 hover:text-white optical-shadow-guard' 
                 : 'p-2 text-[#7f6a55] hover:text-[#2b1a10]'
             }`}
             aria-label="Sleep timer"
@@ -569,7 +665,7 @@ export function QuranAudioPlayerScreen({
             <div className="relative">
               <Moon size={22} strokeWidth={2.2} />
               {timerMinutesRemaining !== null && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#deab65] animate-pulse" />
+                <span className={`absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse ${isVideoTheme ? 'bg-white' : 'bg-[#deab65]'}`} />
               )}
             </div>
           </button>
@@ -585,7 +681,7 @@ export function QuranAudioPlayerScreen({
             }}
             className={`transition-all active:scale-90 cursor-pointer flex items-center justify-center ${
               isVideoTheme 
-                ? 'w-10 h-10 rounded-full bg-[#deab65]/10 hover:bg-[#deab65]/20 border border-[#deab65]/30 text-[#deab65] hover:text-white backdrop-blur-md shadow-md' 
+                ? 'w-10 h-10 rounded-full liquid-glass-button text-white hover:text-white' 
                 : 'p-2 text-[#2b1a10] hover:text-[#b88a4f]'
             }`}
             aria-label="Previous or Rewind"
@@ -598,7 +694,7 @@ export function QuranAudioPlayerScreen({
             onClick={onTogglePlay}
             className={`flex items-center justify-center active:scale-95 transition-all cursor-pointer ${
               isVideoTheme
-                ? 'w-14 h-14 rounded-full bg-gradient-to-br from-[#deab65]/15 to-[#b88a4f]/20 text-[#deab65] hover:text-white border-2 border-[#deab65]/35 hover:border-[#deab65] shadow-[0_8px_32px_rgba(222,171,101,0.15)] backdrop-blur-md saturate-[150%] brightness-[1.05] hover:scale-105'
+                ? 'w-14 h-14 rounded-full liquid-glass-play-btn text-white hover:scale-105'
                 : 'w-14 h-14 rounded-full bg-gradient-to-br from-[#deab65] to-[#b88a4f] text-white shadow-[0_10px_28px_rgba(184,138,79,0.4)] border border-[#c49a62]'
             }`}
             aria-label={isPlaying ? "Pause" : "Play"}
@@ -621,7 +717,7 @@ export function QuranAudioPlayerScreen({
             }}
             className={`transition-all active:scale-90 cursor-pointer flex items-center justify-center ${
               isVideoTheme 
-                ? 'w-10 h-10 rounded-full bg-[#deab65]/10 hover:bg-[#deab65]/20 border border-[#deab65]/30 text-[#deab65] hover:text-white backdrop-blur-md shadow-md' 
+                ? 'w-10 h-10 rounded-full liquid-glass-button text-white hover:text-white' 
                 : 'p-2 text-[#2b1a10] hover:text-[#b88a4f]'
             }`}
             aria-label="Next or Fast forward"
@@ -634,7 +730,7 @@ export function QuranAudioPlayerScreen({
             onClick={() => setActiveSheet(activeSheet === 'speed' ? null : 'speed')}
             className={`transition-all active:scale-90 cursor-pointer flex items-center justify-center font-bold ${
               isVideoTheme 
-                ? 'p-2 text-[#deab65] hover:text-white text-base drop-shadow-md' 
+                ? 'p-2 text-white/90 hover:text-white text-base optical-shadow-guard' 
                 : 'p-2 text-[#b88a4f] hover:text-[#2b1a10] text-base'
             }`}
             aria-label="Playback speed"
@@ -652,7 +748,7 @@ export function QuranAudioPlayerScreen({
               isDragging ? 'h-3' : 'h-1.5 hover:h-3'
             } ${
               isVideoTheme
-                ? 'bg-white/15 border border-white/10 backdrop-blur-xs'
+                ? 'liquid-glass-input'
                 : 'bg-[#2b1a10]/12'
             }`}
             onMouseDown={(e) => {
@@ -665,13 +761,13 @@ export function QuranAudioPlayerScreen({
             }}
           >
             <div 
-              className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-[#deab65] to-[#b88a4f] rounded-full h-full"
+              className={`absolute top-0 bottom-0 left-0 rounded-full h-full ${isVideoTheme ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'bg-gradient-to-r from-[#deab65] to-[#b88a4f]'}`}
               style={{ width: `${currentProgressPercent}%` }}
             />
           </div>
 
           <div className={`flex items-center justify-between w-full mt-2 text-sm font-bold font-mono tracking-tight ${
-            isVideoTheme ? 'text-white/80' : 'text-[#7f6a55]'
+            isVideoTheme ? 'text-white/85 optical-shadow-guard' : 'text-[#7f6a55]'
           }`}>
             <span>{formatRemainingTime()}</span>
             <span>{formatTime(isDragging && dragProgress !== null ? (dragProgress / 100) * duration : currentTime)}</span>
@@ -686,35 +782,35 @@ export function QuranAudioPlayerScreen({
         {/* Queue */}
         <button
           onClick={() => setActiveSheet(activeSheet === 'queue' ? null : 'queue')}
-          className={`transition-all cursor-pointer ${
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
             isVideoTheme
-              ? `w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md border ${
-                  activeSheet === 'queue'
-                    ? 'bg-[#deab65] text-white border-[#deab65] shadow-lg scale-110'
-                    : 'bg-white/12 hover:bg-white/20 text-white/80 hover:text-white border-white/25 shadow-md active:scale-95'
-                }`
-              : `p-3 ${activeSheet === 'queue' ? 'text-[#b88a4f] scale-110' : 'text-[#7f6a55] hover:text-[#2b1a10]'}`
+              ? activeSheet === 'queue'
+                ? 'liquid-glass-button-active text-white'
+                : 'liquid-glass-button text-white/80 hover:text-white active:scale-95'
+              : activeSheet === 'queue'
+                ? 'bg-[#b88a4f]/15 text-[#b88a4f]'
+                : 'text-[#7f6a55] hover:text-[#2b1a10] active:scale-95'
           }`}
           aria-label="Surahs list"
         >
-          <List size={isVideoTheme ? 18 : 26} strokeWidth={2.2} />
+          <List size={isVideoTheme ? 18 : 24} strokeWidth={2.2} />
         </button>
 
         {/* Cast */}
         <button
           onClick={() => setActiveSheet(activeSheet === 'cast' ? null : 'cast')}
-          className={`transition-all cursor-pointer ${
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
             isVideoTheme
-              ? `w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md border ${
-                  activeSheet === 'cast'
-                    ? 'bg-[#deab65] text-white border-[#deab65] shadow-lg scale-110'
-                    : 'bg-white/12 hover:bg-white/20 text-white/80 hover:text-white border-white/25 shadow-md active:scale-95'
-                }`
-              : `p-3 ${activeSheet === 'cast' ? 'text-[#b88a4f] scale-110' : 'text-[#7f6a55] hover:text-[#2b1a10]'}`
+              ? activeSheet === 'cast'
+                ? 'liquid-glass-button-active text-white'
+                : 'liquid-glass-button text-white/80 hover:text-white active:scale-95'
+              : activeSheet === 'cast'
+                ? 'bg-[#b88a4f]/15 text-[#b88a4f]'
+                : 'text-[#7f6a55] hover:text-[#2b1a10] active:scale-95'
           }`}
           aria-label="Cast audio"
         >
-          <Cast size={isVideoTheme ? 16 : 24} strokeWidth={2.2} />
+          <Cast size={isVideoTheme ? 16 : 22} strokeWidth={2.2} />
         </button>
 
         {/* Quran Text View */}
@@ -722,10 +818,10 @@ export function QuranAudioPlayerScreen({
           onClick={() => {
             if (onOpenReader) onOpenReader();
           }}
-          className={`transition-all cursor-pointer flex items-center justify-center ${
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
             isVideoTheme
-              ? 'w-10 h-10 rounded-full backdrop-blur-md border bg-white/12 hover:bg-white/20 text-white border-white/25 shadow-md active:scale-95'
-              : `p-3 active:scale-90 ${isVideoTheme ? 'text-white hover:text-[#deab65]' : 'text-[#2b1a10] hover:text-[#b88a4f]'}`
+              ? 'liquid-glass-button text-white active:scale-95'
+              : 'text-[#2b1a10] hover:text-[#b88a4f] active:scale-95'
           }`}
           aria-label="Open Quran text reader"
         >
@@ -737,91 +833,24 @@ export function QuranAudioPlayerScreen({
         {/* Volume & Sound Effects */}
         <button
           onClick={() => setActiveSheet(activeSheet === 'volume' ? null : 'volume')}
-          className={`transition-all cursor-pointer ${
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
             isVideoTheme
-              ? `w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md border ${
-                  activeSheet === 'volume'
-                    ? 'bg-[#deab65] text-white border-[#deab65] shadow-lg scale-110'
-                    : 'bg-white/12 hover:bg-white/20 text-white/80 hover:text-white border-white/25 shadow-md active:scale-95'
-                }`
-              : `p-3 ${activeSheet === 'volume' ? 'text-[#b88a4f] scale-110' : 'text-[#7f6a55] hover:text-[#2b1a10]'}`
+              ? activeSheet === 'volume'
+                ? 'liquid-glass-button-active text-white'
+                : 'liquid-glass-button text-white/80 hover:text-white active:scale-95'
+              : activeSheet === 'volume'
+                ? 'bg-[#b88a4f]/15 text-[#b88a4f]'
+                : 'text-[#7f6a55] hover:text-[#2b1a10] active:scale-95'
           }`}
           aria-label="Volume settings"
         >
-          <Volume2 size={isVideoTheme ? 18 : 26} strokeWidth={2.2} />
+          <Volume2 size={isVideoTheme ? 18 : 24} strokeWidth={2.2} />
         </button>
 
       </footer>
 
 
-      {/* ─────────────────── MODALS / BOTTOM SHEETS ─────────────────── */}
-
-      {/* Sheet 1: Background Video ("الخلفيات") */}
-      <AnimatePresence>
-        {activeSheet === 'ambient' && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActiveSheet(null)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={`fixed bottom-0 inset-x-0 z-50 backdrop-blur-2xl border-t p-6 pb-10 flex flex-col max-h-[82vh] text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-t-[32px] ${
-                isVideoTheme 
-                  ? 'bg-white/12 border-white/30 saturate-[180%] brightness-[1.1]' 
-                  : 'bg-[#1a1512]/98 border-white/15'
-              }`}
-              dir="rtl"
-            >
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-              
-              {/* Top Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-                <div className="flex items-center gap-2">
-                  <Sparkles size={20} className="text-[#deab65]" />
-                  <h3 className="text-lg font-bold text-white">خلفيات الشاشة</h3>
-                </div>
-                <button
-                  onClick={() => setActiveSheet(null)}
-                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-5 gap-2.5">
-                {Array.from({ length: TOTAL_BG_VIDEOS }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { selectBgVideo(i); setActiveSheet(null); }}
-                    className={`aspect-square rounded-2xl flex items-center justify-center font-bold text-base transition-all cursor-pointer ${
-                      bgVideoIndex === i
-                        ? 'bg-emerald-400/20 border border-emerald-400 text-emerald-400'
-                        : 'bg-white/5 border border-white/10 text-white hover:bg-white/15'
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                onClick={() => { selectBgVideo(null); setActiveSheet(null); }}
-                className="mt-4 w-full py-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer hover:bg-red-500/20"
-              >
-                <VideoOff size={16} />
-                إيقاف الفيديو
-              </button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* ─────────────────── MODALS / POPOVERS ─────────────────── */}
 
       {/* Sheet 2: Sleep Timer ("مؤقت النوم") */}
       <AnimatePresence>
@@ -839,10 +868,10 @@ export function QuranAudioPlayerScreen({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={`fixed bottom-0 inset-x-0 z-50 backdrop-blur-2xl border-t p-6 pb-10 flex flex-col text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-t-[32px] ${
+              className={`fixed bottom-0 inset-x-0 z-50 p-6 pb-10 flex flex-col text-white rounded-t-[32px] font-sans ${
                 isVideoTheme 
-                  ? 'bg-white/12 border-white/30 saturate-[180%] brightness-[1.1]' 
-                  : 'bg-[#1a1512]/98 border-white/15'
+                  ? 'liquid-glass-sheet' 
+                  : 'bg-[#1a1512]/98 border-white/15 backdrop-blur-2xl border-t shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
               }`}
               dir="rtl"
             >
@@ -850,8 +879,8 @@ export function QuranAudioPlayerScreen({
               
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
                 <div className="flex items-center gap-2">
-                  <Moon size={18} className="text-[#deab65]" />
-                  <h3 className="text-lg font-bold text-white">مؤقت النوم الإيقاف التلقائي</h3>
+                  <Moon size={18} className={isVideoTheme ? "text-white" : "text-[#deab65]"} />
+                  <h3 className="text-lg font-display font-bold text-white">مؤقت النوم الإيقاف التلقائي</h3>
                 </div>
                 <button
                   onClick={() => setActiveSheet(null)}
@@ -882,16 +911,18 @@ export function QuranAudioPlayerScreen({
                         onSetTimer(item.minutes);
                         setActiveSheet(null);
                       }}
-                      className={`p-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between cursor-pointer ${
+                      className={`p-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between cursor-pointer font-sans ${
                         isSelected 
-                          ? 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white shadow-md scale-[1.02]' 
+                          ? isVideoTheme
+                            ? 'bg-white text-black shadow-md scale-[1.02]'
+                            : 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white shadow-md scale-[1.02]' 
                           : isVideoTheme
-                            ? 'bg-white/10 border border-white/20 text-white hover:bg-white/15'
+                            ? 'liquid-glass-button text-white hover:bg-white/20'
                             : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
                       }`}
                     >
                       <span>{item.label}</span>
-                      {isSelected && <Check size={18} className="text-white" />}
+                      {isSelected && <Check size={18} className={isVideoTheme ? "text-black" : "text-white"} />}
                     </button>
                   );
                 })}
@@ -918,10 +949,10 @@ export function QuranAudioPlayerScreen({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={`fixed bottom-0 inset-x-0 z-50 backdrop-blur-2xl border-t p-6 pb-10 flex flex-col text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-t-[32px] ${
+              className={`fixed bottom-0 inset-x-0 z-50 p-6 pb-10 flex flex-col text-white rounded-t-[32px] font-sans ${
                 isVideoTheme 
-                  ? 'bg-white/12 border-white/30 saturate-[180%] brightness-[1.1]' 
-                  : 'bg-[#1a1512]/98 border-white/15'
+                  ? 'liquid-glass-sheet' 
+                  : 'bg-[#1a1512]/98 border-white/15 backdrop-blur-2xl border-t shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
               }`}
               dir="rtl"
             >
@@ -929,8 +960,8 @@ export function QuranAudioPlayerScreen({
               
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
                 <div className="flex items-center gap-2">
-                  <Clock size={18} className="text-[#deab65]" />
-                  <h3 className="text-lg font-bold text-white">سرعة التشغيل</h3>
+                  <Clock size={18} className={isVideoTheme ? "text-white" : "text-[#deab65]"} />
+                  <h3 className="text-lg font-display font-bold text-white">سرعة التشغيل</h3>
                 </div>
                 <button
                   onClick={() => setActiveSheet(null)}
@@ -940,7 +971,7 @@ export function QuranAudioPlayerScreen({
                 </button>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 font-sans">
                 {[
                   { rate: 0.5, label: "0.5x - بطيء جداً" },
                   { rate: 0.75, label: "0.75x - بطيء" },
@@ -957,16 +988,18 @@ export function QuranAudioPlayerScreen({
                         onPlaybackRateChange(item.rate);
                         setActiveSheet(null);
                       }}
-                      className={`w-full p-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between cursor-pointer ${
+                      className={`w-full p-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between cursor-pointer font-sans ${
                         isSelected 
-                          ? 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white shadow-md' 
+                          ? isVideoTheme
+                            ? 'bg-white text-black shadow-md'
+                            : 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white shadow-md' 
                           : isVideoTheme
-                            ? 'bg-white/10 border border-white/20 text-white hover:bg-white/15'
+                            ? 'liquid-glass-button text-white hover:bg-white/20'
                             : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
                       }`}
                     >
                       <span>{item.label}</span>
-                      {isSelected && <Check size={18} className="text-white" />}
+                      {isSelected && <Check size={18} className={isVideoTheme ? "text-black" : "text-white"} />}
                     </button>
                   );
                 })}
@@ -977,7 +1010,7 @@ export function QuranAudioPlayerScreen({
       </AnimatePresence>
 
 
-      {/* Sheet 5: Floating Volume & Sound Controls Card */}
+      {/* Floating Volume Control Pill */}
       <AnimatePresence>
         {activeSheet === 'volume' && (
           <>
@@ -985,61 +1018,72 @@ export function QuranAudioPlayerScreen({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
               onClick={() => setActiveSheet(null)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-xs z-40"
+              className="fixed inset-0 z-40 pointer-events-auto"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 25 }}
+              initial={{ opacity: 0, scale: 0.95, y: 4 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 25 }}
-              transition={{ type: "spring", stiffness: 350, damping: 28 }}
-              className={`fixed bottom-24 inset-x-5 z-50 max-w-sm mx-auto backdrop-blur-2xl border rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col gap-6 text-white select-none ${
+              exit={{ opacity: 0, scale: 0.95, y: 4 }}
+              transition={{ type: "spring", stiffness: 850, damping: 42 }}
+              className={`absolute bottom-[78px] right-4 sm:right-8 z-50 w-52 sm:w-56 rounded-full px-3.5 py-2 flex items-center gap-3 select-none will-change-transform font-sans ${
                 isVideoTheme
-                  ? 'bg-white/12 border-white/30 saturate-[180%] brightness-[1.1]'
-                  : 'bg-[#1a1512]/98 border-white/15'
+                  ? 'liquid-glass-capsule text-white shadow-[0_12px_36px_rgba(0,0,0,0.35)]'
+                  : 'bg-[#fdfcfb]/98 border-[#2b1a10]/12 text-[#2b1a10] shadow-[0_12px_36px_rgba(43,26,16,0.14)] backdrop-blur-2xl border'
               }`}
-              dir="rtl"
+              dir="ltr"
             >
-              {/* Section 1: Quran Recitation Volume */}
-              <div className="flex flex-col gap-2.5">
-                <div className="text-right font-bold text-lg text-white">
-                  صوت تلاوة القرآن
-                </div>
-                <div className="flex items-center gap-3.5" dir="ltr">
-                  <button 
-                    onClick={() => onVolumeChange(1)}
-                    className="text-[#deab65] hover:text-white transition-colors shrink-0"
-                    aria-label="Max volume"
-                  >
-                    <Volume2 size={22} />
-                  </button>
+              <button 
+                onClick={() => onVolumeChange(0)}
+                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer active:scale-90 ${
+                  isVideoTheme 
+                    ? 'bg-white/5 hover:bg-white/15 text-white/80 hover:text-white' 
+                    : 'bg-[#2b1a10]/04 hover:bg-[#b88a4f]/10 text-[#7f6a55] hover:text-[#b88a4f] border border-[#2b1a10]/03'
+                }`}
+                aria-label="Mute volume"
+              >
+                <VolumeX size={15} />
+              </button>
 
-                  <div className="relative flex-1 flex items-center h-6 group">
-                    <div className="absolute inset-x-0 h-1.5 bg-white/20 rounded-full pointer-events-none transition-[height] duration-150 group-hover:h-3" />
-                    <div 
-                      className="absolute left-0 h-1.5 bg-gradient-to-r from-[#deab65] to-[#b88a4f] rounded-full pointer-events-none transition-[height] duration-150 group-hover:h-3" 
-                      style={{ width: `${volume * 100}%` }}
-                    />
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={volume}
-                      onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                    />
-                  </div>
-
-                  <button 
-                    onClick={() => onVolumeChange(0)}
-                    className="text-[#deab65] hover:text-white transition-colors shrink-0"
-                    aria-label="Mute volume"
-                  >
-                    <VolumeX size={22} />
-                  </button>
-                </div>
+              <div className="relative flex-1 flex items-center h-4 group">
+                <div className={`absolute inset-x-0 h-1.5 rounded-full pointer-events-none ${
+                  isVideoTheme ? 'bg-white/20' : 'bg-[#2b1a10]/08'
+                }`} />
+                <div 
+                  className={`absolute left-0 h-1.5 rounded-full pointer-events-none ${isVideoTheme ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'bg-gradient-to-r from-[#deab65] to-[#b88a4f]'}`}
+                  style={{ width: `${volume * 100}%` }}
+                />
+                <div 
+                  className={`absolute w-3.5 h-3.5 rounded-full shadow-md transition-transform pointer-events-none ${
+                    isVideoTheme 
+                      ? 'bg-white shadow-[0_1.5px_4px_rgba(0,0,0,0.35)]' 
+                      : 'bg-[#b88a4f] border-2 border-[#fdfcfb] shadow-[0_2px_6px_rgba(184,138,79,0.35)]'
+                  } group-hover:scale-115`}
+                  style={{ left: `calc(${volume * 100}% - 7px)` }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={volume}
+                  onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                />
               </div>
+
+              <button 
+                onClick={() => onVolumeChange(1)}
+                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer active:scale-90 ${
+                  isVideoTheme 
+                    ? 'bg-white/5 hover:bg-white/15 text-white/80 hover:text-white' 
+                    : 'bg-[#2b1a10]/04 hover:bg-[#b88a4f]/10 text-[#7f6a55] hover:text-[#b88a4f] border border-[#2b1a10]/03'
+                }`}
+                aria-label="Max volume"
+              >
+                <Volume2 size={15} />
+              </button>
             </motion.div>
           </>
         )}
@@ -1062,27 +1106,27 @@ export function QuranAudioPlayerScreen({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={`fixed bottom-0 inset-x-0 z-50 backdrop-blur-2xl border-t p-6 pb-10 flex flex-col text-center text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-t-[32px] ${
+              className={`fixed bottom-0 inset-x-0 z-50 p-6 pb-10 flex flex-col text-center text-white rounded-t-[32px] font-sans ${
                 isVideoTheme 
-                  ? 'bg-white/12 border-white/30 saturate-[180%] brightness-[1.1]' 
-                  : 'bg-[#1a1512]/98 border-white/15'
+                  ? 'liquid-glass-sheet' 
+                  : 'bg-[#1a1512]/98 border-white/15 backdrop-blur-2xl border-t shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
               }`}
               dir="rtl"
             >
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-5" />
               
-              <div className="w-16 h-16 rounded-full bg-white/10 text-[#deab65] flex items-center justify-center mx-auto mb-4 border border-white/20">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border ${isVideoTheme ? 'bg-white/10 text-white border-white/20' : 'bg-white/10 text-[#deab65] border-white/20'}`}>
                 <Cast size={32} />
               </div>
 
-              <h3 className="text-xl font-bold text-white mb-2">البث اللاسلكي والأجهزة المجاورة</h3>
-              <p className="text-sm text-white/70 mb-6 max-w-xs mx-auto font-medium">
+              <h3 className="text-xl font-display font-bold text-white mb-2">البث اللاسلكي والأجهزة المجاورة</h3>
+              <p className="text-sm text-white/70 mb-6 max-w-xs mx-auto font-medium font-sans">
                 يمكنك توصيل تطبيق السكينة بأجهزة Chromecast أو Bluetooth أو AirPlay للاستماع بجودة عالية.
               </p>
 
               <button
                 onClick={() => setActiveSheet(null)}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white font-bold text-base shadow-md active:scale-95 transition-all cursor-pointer"
+                className={`w-full py-3.5 rounded-2xl font-bold text-base shadow-md active:scale-95 transition-all cursor-pointer font-sans ${isVideoTheme ? 'bg-white text-black hover:bg-white/90' : 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white'}`}
               >
                 حسناً، فهمت
               </button>

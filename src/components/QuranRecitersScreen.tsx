@@ -341,12 +341,33 @@ export default function QuranRecitersScreen({
       <div className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] bg-[#b88a4f]/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[250px] h-[250px] bg-[#deab65]/5 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Floating Top Elements */}
-      <div className="fixed top-6 left-6 right-6 flex items-center justify-between z-40 pointer-events-none">
+      {/* Global Backdrop for Top Bar Dropdowns */}
+      <AnimatePresence>
+        {(isModeDropdownOpen || isDropdownOpen) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-30 cursor-default bg-black/5"
+            onClick={() => {
+              setIsModeDropdownOpen(false);
+              setIsDropdownOpen(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Floating Top Header Bar - Fixed position across states */}
+      <div className="fixed top-6 left-6 right-6 h-10 flex flex-row items-center justify-between flex-nowrap z-40 pointer-events-none">
         {/* Right Element (in RTL): Quran Capsule with Apple UI Dropdown */}
-        <div className="relative pointer-events-auto">
+        <div className="relative shrink-0 h-10 flex items-center pointer-events-auto">
           <button
-            onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)}
+            type="button"
+            onClick={() => {
+              setIsModeDropdownOpen((prev) => !prev);
+              setIsDropdownOpen(false);
+            }}
             className="cut-crystal-capsule px-4.5 h-10 rounded-full shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-[0.97]"
           >
             <span className="text-[14px] font-bold text-[#2b1a10] whitespace-nowrap pt-0.5">
@@ -361,109 +382,102 @@ export default function QuranRecitersScreen({
           {/* Mode Dropdown */}
           <AnimatePresence>
             {isModeDropdownOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-30 cursor-default"
-                  onClick={() => setIsModeDropdownOpen(false)}
-                />
-                <motion.div
-                  initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.96 }}
-                  transition={{ duration: 0.12, ease: "easeOut" }}
-                  className="absolute right-0 mt-2 w-44 cut-crystal-panel rounded-[20px] shadow-lg z-40 overflow-hidden py-1"
+              <motion.div
+                initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                style={{ position: "absolute", top: "calc(100% + 8px)", right: 0 }}
+                className="w-44 max-w-[calc(100vw-48px)] cut-crystal-panel rounded-[20px] shadow-2xl z-50 overflow-hidden py-1 origin-top-right text-right"
+                dir="rtl"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsModeDropdownOpen(false);
+                    if (onModeChange) onModeChange("listening");
+                  }}
+                  className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
                 >
-                  <button
-                    onClick={() => {
-                      setIsModeDropdownOpen(false);
-                      if (onModeChange) onModeChange("listening");
-                    }}
-                    className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
-                  >
-                    <span className="text-[13px] font-bold text-[#b88a4f]">
-                      الاستماع
-                    </span>
-                    <Check size={14} className="text-[#b88a4f] shrink-0" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsModeDropdownOpen(false);
-                      if (onModeChange) onModeChange("reading");
-                    }}
-                    className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
-                  >
-                    <span className="text-[13px] font-bold">القرآن الكريم</span>
-                  </button>
-                </motion.div>
-              </>
+                  <span className="text-[13px] font-bold text-[#b88a4f]">
+                    الاستماع
+                  </span>
+                  <Check size={14} className="text-[#b88a4f] shrink-0" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsModeDropdownOpen(false);
+                    if (onModeChange) onModeChange("reading");
+                  }}
+                  className="w-full flex items-center justify-between py-2.5 px-4 text-right transition-colors hover:bg-[#e8dfd4]/45 text-[#2b1a10]"
+                >
+                  <span className="text-[13px] font-bold">القرآن الكريم</span>
+                </button>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
 
         {/* Left Element: Dropdown Select Pill for "الكل" */}
-        <div className="relative pointer-events-auto">
+        <div className="relative shrink-0 h-10 flex items-center pointer-events-auto">
           <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 cut-crystal-capsule px-4 h-10 rounded-full shadow-md transition-all active:scale-95"
+            type="button"
+            onClick={() => {
+              setIsDropdownOpen((prev) => !prev);
+              setIsModeDropdownOpen(false);
+            }}
+            className="flex items-center gap-2 cut-crystal-capsule px-4 h-10 rounded-full shadow-md transition-all active:scale-95 shrink-0 max-w-[160px]"
           >
-            <span className="text-[13.5px] text-[#2b1a10] font-bold whitespace-nowrap pt-0.5">
-              {selectedFilter.length > 15
-                ? selectedFilter.slice(0, 15) + "..."
-                : selectedFilter}
+            <span className="text-[13.5px] text-[#2b1a10] font-bold whitespace-nowrap pt-0.5 truncate">
+              {selectedFilter}
             </span>
-            <ChevronsUpDown size={14} className="text-[#b88a4f]" />
+            <ChevronsUpDown size={14} className="text-[#b88a4f] shrink-0" />
           </button>
 
           {/* Elegant Floating Dropdown Menu */}
           <AnimatePresence>
             {isDropdownOpen && (
-              <>
-                {/* Backdrop to close dropdown when clicking outside */}
-                <div
-                  className="fixed inset-0 z-30 cursor-default"
-                  onClick={() => setIsDropdownOpen(false)}
-                />
-
-                <motion.div
-                  initial={{ opacity: 0, y: -12, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -12, scale: 0.95 }}
-                  transition={{ type: "spring", damping: 25, stiffness: 350 }}
-                  className="absolute left-0 mt-2.5 w-72 cut-crystal-panel rounded-[24px] shadow-xl z-40 overflow-hidden py-1.5 text-[#2b1a10] max-h-[340px] overflow-y-auto hide-scrollbar"
-                >
-                  <div className="px-4 py-2 text-[12px] font-bold text-[#7f6a55] border-b border-[#e6dccf]/40 text-right">
-                    اختر رواية أو تصفية
-                  </div>
-                  <div className="p-1.5 space-y-1">
-                    {filterOptions.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => {
-                          setSelectedFilter(option);
-                          setIsDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between py-2.5 px-3.5 rounded-[16px] transition-all duration-150 text-right ${
-                          selectedFilter === option
-                            ? "bg-[#b88a4f]/10 text-[#b88a4f]"
-                            : "hover:bg-[#e8dfd4]/40 text-[#2b1a10] active:scale-[0.98]"
-                        }`}
-                      >
-                        <span
-                          className={`text-[13.5px] ${selectedFilter === option ? "font-bold" : "font-bold"}`}
-                        >
-                          {option}
-                        </span>
-                        {selectedFilter === option && (
-                          <Check
-                            size={15}
-                            className="text-[#b88a4f] shrink-0"
-                          />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              </>
+              <motion.div
+                initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                style={{ position: "absolute", top: "calc(100% + 8px)", left: 0 }}
+                className="w-60 max-w-[calc(100vw-48px)] cut-crystal-panel rounded-[22px] shadow-2xl z-50 overflow-hidden text-[#2b1a10] max-h-[250px] overflow-y-auto hide-scrollbar origin-top-left"
+                dir="rtl"
+              >
+                <div className="px-4 py-2 text-[12px] font-bold text-[#7f6a55] border-b border-[#e6dccf]/40 text-right sticky top-0 bg-[#f7f2ea]/95 backdrop-blur-md z-10">
+                  اختر رواية أو تصفية
+                </div>
+                <div className="p-1.5 space-y-1">
+                  {filterOptions.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilter(option);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between py-2.5 px-3.5 rounded-[16px] transition-all duration-150 text-right ${
+                        selectedFilter === option
+                          ? "bg-[#b88a4f]/10 text-[#b88a4f]"
+                          : "hover:bg-[#e8dfd4]/40 text-[#2b1a10] active:scale-[0.98]"
+                      }`}
+                    >
+                      <span className="text-[13.5px] font-bold truncate">
+                        {option}
+                      </span>
+                      {selectedFilter === option && (
+                        <Check
+                          size={15}
+                          className="text-[#b88a4f] shrink-0 mr-2"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

@@ -641,7 +641,7 @@ export default function App() {
      RENDER
      ═══════════════════════════════════════════════════════════════════ */
   return (
-    <div dir="rtl" className="min-h-screen bg-[#ece7de] text-[#2b1a10]">
+    <div dir="rtl" className="min-h-screen w-full overflow-x-hidden bg-[#ece7de] text-[#2b1a10]">
       {/* ── Azkar Counter Overlay (full screen) ── */ }
       {showAzkarCounter && (
         <AzkarCounterScreen
@@ -1054,7 +1054,7 @@ export default function App() {
         {/* TAB: AZKAR */}
         <div
           className={
-            activeTab === "azkar" && !showAzkarCounter ? "block" : "hidden"
+            activeTab === "azkar" && !showAzkarCounter ? "block w-full overflow-x-hidden" : "hidden"
           }
         >
           <AzkarTabScreen

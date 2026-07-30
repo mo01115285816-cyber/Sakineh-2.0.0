@@ -246,24 +246,32 @@ const AzkarTabScreen = React.memo(function AzkarTabScreen({
   return (
     <div
       dir="rtl"
-      className="bg-[#ece7de] min-h-screen max-w-[390px] mx-auto overflow-y-auto pb-28 font-sans"
+      className="bg-[#ece7de] min-h-screen w-full max-w-[390px] mx-auto overflow-y-auto overflow-x-hidden pt-24 pb-28 font-sans relative"
     >
-      {/* ── Header ── */}
-      <div className="sticky top-0 z-10 bg-[#ece7de]/90 backdrop-blur-md pt-6 pb-4 px-5 flex items-center justify-between">
-        <div>
-          <h1 className="text-[26px] font-bold text-[#2b1a10] tracking-tight">
+      {/* Background soft ambient shapes clipped safely */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] bg-[#b88a4f]/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[250px] h-[250px] bg-[#deab65]/5 rounded-full blur-[100px] pointer-events-none" />
+      </div>
+
+      {/* ── FLOATING TOP HEADER ── */}
+      <div className="fixed top-6 inset-x-0 px-5 max-w-[390px] mx-auto h-10 flex items-center justify-between z-40 pointer-events-none">
+        {/* Right Element (in RTL): Azkar Title Capsule */}
+        <div className="cut-crystal-capsule px-5 h-10 rounded-full shadow-md flex items-center justify-center pointer-events-auto">
+          <span className="text-[14.5px] font-bold text-[#2b1a10] whitespace-nowrap pt-0.5">
             الأذكار
-          </h1>
-          <p className="text-[13px] text-[#7f6a55] font-bold">
-            حصن المسلم اليومي
-          </p>
+          </span>
         </div>
+
+        {/* Left Element: Reset / Refresh Button Capsule */}
         <motion.button
           whileTap={{ scale: 0.9, rotate: 180 }}
           onClick={refreshState}
-          className="w-10 h-10 rounded-full bg-[#f7f2ea] shadow-sm border border-[#e6dccf] flex items-center justify-center text-[#7f6a55] hover:text-[#b88a4f] transition-colors"
+          className="w-10 h-10 cut-crystal-capsule rounded-full flex items-center justify-center shadow-md text-[#2b1a10] hover:text-[#b88a4f] active:scale-95 transition-all pointer-events-auto cursor-pointer"
+          title="تحديث وإعادة ضبط الأذكار"
+          aria-label="تحديث وإعادة ضبط الأذكار"
         >
-          <RefreshCw size={18} />
+          <RefreshCw size={18} className="text-[#b88a4f]" />
         </motion.button>
       </div>
 
