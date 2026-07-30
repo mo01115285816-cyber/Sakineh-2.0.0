@@ -222,6 +222,8 @@ export function QuranAudioPlayerScreen({
     { id: 2, name: 'سحاب', src: '/videos/3.mp4' },
     { id: 3, name: 'أمواج', src: '/videos/4.mp4' },
     { id: 4, name: 'مطر', src: '/videos/5.mp4' },
+    { id: 5, name: 'نهر', src: '/videos/6.mp4' },
+    { id: 6, name: 'بحر', src: '/videos/7.mp4' },
   ];
 
   const [bgVideoIndex, setBgVideoIndex] = useState<number | null>(() => {
@@ -329,7 +331,7 @@ export function QuranAudioPlayerScreen({
       )}
 
       {/* ─────────────────── TOP BAR ─────────────────── */}
-      <header className="relative z-10 pt-3 px-6 flex flex-col items-center shrink-0">
+      <header className="relative z-50 pt-3 px-6 flex flex-col items-center shrink-0">
          {/* Swipe Handle Indicator Bar */}
          <button 
           onClick={onClose}
@@ -339,10 +341,10 @@ export function QuranAudioPlayerScreen({
           }`}
         />
 
-        {/* Top Dropdown Pill ("الخلفيات") */}
+        {/* Top Dropdown Pill ("الخلفيات") - Text only, toggles menu */}
         <button
           onClick={() => setActiveSheet(activeSheet === 'ambient' ? null : 'ambient')}
-          className={`hover:opacity-90 active:scale-95 transition-all rounded-full px-5 py-2 font-sans font-bold text-sm flex items-center gap-2 cursor-pointer ${
+          className={`hover:opacity-90 active:scale-95 transition-all rounded-full px-6 py-2 font-sans font-bold text-sm flex items-center justify-center cursor-pointer ${
             isVideoTheme
               ? 'liquid-glass-capsule text-white optical-shadow-guard'
               : 'cut-crystal-capsule border-[#2b1a10]/10 text-[#2b1a10]'
@@ -352,7 +354,6 @@ export function QuranAudioPlayerScreen({
           <span className="text-[14px] font-sans font-bold tracking-wide">
             الخلفيات
           </span>
-          <ChevronDown size={16} className={isVideoTheme ? "text-white/80" : "text-[#b88a4f]"} />
         </button>
       </header>
 
@@ -361,7 +362,7 @@ export function QuranAudioPlayerScreen({
       <AnimatePresence>
         {activeSheet === 'ambient' && (
           <>
-            {/* Transparent click-outside overlay without dark blur */}
+            {/* Transparent click-outside overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -370,80 +371,70 @@ export function QuranAudioPlayerScreen({
               onClick={() => setActiveSheet(null)}
               className="fixed inset-0 z-30 pointer-events-auto"
             />
-            {/* Perfectly centered flex layout container to prevent translation clashing */}
-            <div className="absolute inset-x-0 top-[56px] bottom-[270px] z-40 flex items-center justify-center pointer-events-none">
+            {/* Centered card container */}
+            <div className="absolute inset-x-0 top-[56px] z-40 flex items-center justify-center pointer-events-none">
               <motion.div
                 initial={{ opacity: 0, scale: 0.96, y: -6 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: -6 }}
                 transition={{ type: "spring", stiffness: 600, damping: 38 }}
-                className={`w-[calc(100%-32px)] max-w-[360px] h-full max-h-[410px] rounded-[32px] p-4.5 flex flex-col pointer-events-auto will-change-transform font-sans ${
+                className={`w-[calc(100%-32px)] max-w-[340px] rounded-[28px] p-4 flex flex-col pointer-events-auto will-change-transform font-sans ${
                   isVideoTheme
                     ? 'liquid-glass-card text-white'
                     : 'cut-crystal-panel text-[#2b1a10]'
                 }`}
                 dir="rtl"
               >
-                {/* Top Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-current/10 mb-3 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={18} className={isVideoTheme ? "text-white" : "text-[#b88a4f]"} />
-                    <h3 className={`text-base font-display font-bold ${isVideoTheme ? 'text-white' : 'text-[#2b1a10]'}`}>
-                      خلفيات الشاشة
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => setActiveSheet(null)}
-                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                      isVideoTheme ? 'bg-white/10 text-white/80 hover:text-white' : 'bg-[#2b1a10]/05 text-[#7f6a55] hover:text-[#2b1a10] hover:bg-[#b88a4f]/10'
-                    }`}
-                  >
-                    <X size={16} />
-                  </button>
+                {/* Header (Clean title only, no AI icon, no close button) */}
+                <div className="flex items-center justify-center pb-2.5 border-b border-current/10 mb-3 shrink-0">
+                  <h3 className={`text-base font-display font-bold ${isVideoTheme ? 'text-white' : 'text-[#2b1a10]'}`}>
+                    خلفيات الشاشة
+                  </h3>
                 </div>
 
-                {/* Scrollable / Flexible content area */}
-                <div className="flex-1 flex flex-col justify-between">
-                  {/* Video Thumbnails Grid */}
-                  <div className="flex-grow flex flex-col justify-center my-2">
-                    <p className="text-xs opacity-75 mb-3 text-right font-medium">اختر مظهر الخلفية المناسب:</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                      {BG_VIDEOS.map((video) => {
-                        const isSelected = bgVideoIndex === video.id;
-                        return (
-                          <button
-                            key={video.id}
-                            onClick={() => { selectBgVideo(video.id); setActiveSheet(null); }}
-                            className={`py-3 px-3 rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-all cursor-pointer active:scale-95 ${
-                              isSelected
-                                ? isVideoTheme
-                                  ? 'bg-white/25 border border-white/60 text-white font-extrabold shadow-sm scale-[1.02]'
-                                  : 'bg-gradient-to-br from-[#deab65] to-[#b88a4f] text-white border border-[#c49a62]/40 font-extrabold shadow-sm scale-[1.02]'
-                                : isVideoTheme
-                                  ? 'liquid-glass-button text-white hover:bg-white/20'
-                                  : 'bg-[#2b1a10]/05 border border-[#2b1a10]/08 text-[#2b1a10] hover:bg-[#b88a4f]/10 hover:border-[#b88a4f]/30 hover:text-[#b88a4f]'
+                {/* Video Options Grid (Fits all 7 items without scrolling) */}
+                <div className="grid grid-cols-2 gap-2">
+                  {BG_VIDEOS.map((video) => {
+                    const isSelected = bgVideoIndex === video.id;
+                    const isLastOdd = video.id === 6;
+                    return (
+                      <button
+                        key={video.id}
+                        onClick={() => {
+                          if (isSelected) {
+                            selectBgVideo(null);
+                          } else {
+                            selectBgVideo(video.id);
+                          }
+                          setActiveSheet(null);
+                        }}
+                        className={`py-2.5 px-3.5 rounded-2xl flex items-center justify-between font-bold text-sm transition-all cursor-pointer active:scale-95 ${
+                          isLastOdd ? 'col-span-2' : ''
+                        } ${
+                          isSelected
+                            ? isVideoTheme
+                              ? 'liquid-glass-button-active text-white border border-white/40 shadow-xs scale-[1.01]'
+                              : 'bg-gradient-to-r from-[#deab65] to-[#b88a4f] text-white border border-[#c49a62]/40 shadow-xs scale-[1.01]'
+                            : isVideoTheme
+                              ? 'liquid-glass-button text-white/90 hover:text-white hover:bg-white/20'
+                              : 'bg-[#2b1a10]/05 border border-[#2b1a10]/08 text-[#2b1a10] hover:bg-[#b88a4f]/10 hover:border-[#b88a4f]/30 hover:text-[#b88a4f]'
+                        }`}
+                      >
+                        <span className="truncate">{video.name}</span>
+                        {isSelected && (
+                          <div
+                            className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 shadow-xs ${
+                              isVideoTheme
+                                ? 'bg-white text-black'
+                                : 'bg-white text-[#b88a4f]'
                             }`}
                           >
-                            <Film size={15} className="shrink-0 opacity-80" />
-                            <span>{video.name}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Turn Off Video Button at the very bottom */}
-                  <button
-                    onClick={() => { selectBgVideo(null); setActiveSheet(null); }}
-                    className={`w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all shrink-0 ${
-                      isVideoTheme
-                        ? 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20'
-                        : 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100'
-                    }`}
-                  >
-                    <VideoOff size={15} />
-                    إيقاف الفيديو
-                  </button>
+                            <Check size={11} strokeWidth={3} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             </div>
