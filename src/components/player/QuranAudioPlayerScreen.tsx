@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { SeamlessBgVideo } from './SeamlessBgVideo';
 import { 
   ChevronDown, 
@@ -117,6 +117,8 @@ export function QuranAudioPlayerScreen({
   playlist = [],
   onPlaySurah,
 }: Props) {
+  const dragControls = useDragControls();
+
   // Modal Sheet States
   const [activeSheet, setActiveSheet] = useState<"ambient" | "timer" | "speed" | "queue" | "volume" | "cast" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -290,7 +292,18 @@ export function QuranAudioPlayerScreen({
   }, [availableSurahs, searchQuery]);
 
   return (
-    <div 
+    <motion.div 
+      drag="y"
+      dragControls={dragControls}
+      dragListener={false}
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={{ top: 0.05, bottom: 0.85 }}
+      dragSnapToOrigin={true}
+      onDragEnd={(_event, info) => {
+        if (info.offset.y > 100 || info.velocity.y > 350) {
+          onClose();
+        }
+      }}
       className={`relative w-full h-full flex flex-col justify-between overflow-hidden select-none font-sans min-h-screen transition-colors duration-500 ${
         isVideoTheme ? 'text-white' : 'text-[#2b1a10]'
       }`}
@@ -331,15 +344,22 @@ export function QuranAudioPlayerScreen({
       )}
 
       {/* ─────────────────── TOP BAR ─────────────────── */}
-      <header className="relative z-50 pt-3 px-6 flex flex-col items-center shrink-0">
-         {/* Swipe Handle Indicator Bar */}
-         <button 
+      <header className="relative z-50 pt-2 px-6 flex flex-col items-center shrink-0">
+        {/* Swipe Handle Indicator Bar (Interactive drag to dismiss handle) */}
+        <div
+          onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          aria-label="Close player"
-          className={`w-12 h-1 rounded-full cursor-pointer transition-colors mb-3.5 ${
-            isVideoTheme ? 'bg-white/40 hover:bg-white/60' : 'bg-[#2b1a10]/20 hover:bg-[#2b1a10]/35'
-          }`}
-        />
+          aria-label="Drag to dismiss or click to close player"
+          className="py-2 px-8 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none mb-1 group"
+        >
+          <div
+            className={`w-12 h-1.5 rounded-full transition-all duration-200 group-hover:scale-x-110 group-active:scale-95 ${
+              isVideoTheme
+                ? 'bg-white/40 group-hover:bg-white/60 shadow-[0_1px_4px_rgba(0,0,0,0.25)] backdrop-blur-sm'
+                : 'bg-[#2b1a10]/25 group-hover:bg-[#2b1a10]/40 shadow-[0_1px_2px_rgba(43,26,16,0.12)]'
+            }`}
+          />
+        </div>
 
         {/* Top Dropdown Pill ("الخلفيات") - Text only, toggles menu */}
         <button
@@ -1138,7 +1158,7 @@ export function QuranAudioPlayerScreen({
         )}
       </AnimatePresence>
 
-    </div>
+    </motion.div>
   );
 }
 
