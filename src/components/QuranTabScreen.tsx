@@ -9,8 +9,6 @@ import { RadioStation } from "@/types/radio";
 import QuranRecitersScreen from "./QuranRecitersScreen";
 import QuranSurahsScreen from "./QuranSurahsScreen";
 import QuranAudioPlayerScreen from "./QuranAudioPlayerScreen";
-import QuranReaderScreen from "./QuranReaderScreen";
-import QuranReadingGatewayScreen from "./QuranReadingGatewayScreen";
 import QuranDownloadScreen from "./QuranDownloadScreen";
 
 
@@ -57,31 +55,12 @@ const QuranTabScreen = React.memo(function QuranTabScreen({
     number | null
   >(null);
 
-  // Interactive Reading Screen State
-  const [readingSurahId, setReadingSurahId] = useState<number | null>(null);
-  const [readingInitialPage, setReadingInitialPage] = useState<
-    number | undefined
-  >(undefined);
-
-  const [isQuranDownloaded, setIsQuranDownloaded] = useState<boolean | null>(
-    null,
-  );
-
-  useEffect(() => {
-    setIsQuranDownloaded(true); // Mock for UI Template
-  }, []);
-
-  const handleReadSurah = useCallback((surahId: number, page?: number) => {
-    setReadingSurahId(surahId);
-    setReadingInitialPage(page);
-  }, []);
-
   // Synchronize bottom navigation visibility
   useEffect(() => {
     if (onHideNavChange) {
-      onHideNavChange(isPlayerOpen || readingSurahId !== null);
+      onHideNavChange(isPlayerOpen);
     }
-  }, [isPlayerOpen, readingSurahId, onHideNavChange]);
+  }, [isPlayerOpen, onHideNavChange]);
 
   // Audio HTML Element Ref
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -486,64 +465,46 @@ const QuranTabScreen = React.memo(function QuranTabScreen({
 
   return (
     <div className="w-full min-h-screen relative flex flex-col" dir="rtl">
-      {/* Normal Tab Screens navigation: Reciters, Surah list, or Reading Gateway (Always optimized to guarantee INSTANT performance) */}
+      {/* Normal Tab Screens navigation: Reciters, Surah list */}
       <div className="w-full flex-1 flex flex-col">
-        {quranMode === "listening" ? (
-          <>
-            <div
-              className={
-                currentScreen === "reciters" ? "block w-full" : "hidden"
-              }
-            >
-              <QuranRecitersScreen
-                onSelectReciter={handleSelectReciter}
-                playingSurahId={playingSurahId}
-                isPlaying={isPlaying}
-                onTogglePlay={handleTogglePlay}
-                onOpenPlayer={() => setIsPlayerOpen(true)}
-                onClosePlayer={() => setPlayingSurahId(null)}
-                selectedReciter={selectedReciter}
-                selectedMoshaf={selectedMoshaf}
-                audioRef={audioRef}
-                currentPlayingRadio={currentPlayingRadio}
-                onPlayRadio={playRadio}
-                onPauseRadio={pauseRadio}
-                onModeChange={setQuranMode}
-              />
-            </div>
-
-            <div
-              className={currentScreen === "surahs" ? "block w-full" : "hidden"}
-            >
-              {selectedReciter && selectedMoshaf && (
-                <QuranSurahsScreen
-                  reciter={selectedReciter}
-                  moshaf={selectedMoshaf}
-                  onBack={handleBackToReciters}
-                  onPlaySurah={playSurah}
-                  currentlyPlayingId={playingSurahId || undefined}
-                  isPlaying={isPlaying}
-                  onTriggerTimer={handleOpenTimerSheet}
-                  onReadSurah={handleReadSurah}
-                />
-              )}
-            </div>
-          </>
-        ) : isQuranDownloaded === null ? (
-          <div className="w-full h-[80vh] flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin border-[#b88a4f]"></div>
-          </div>
-        ) : isQuranDownloaded === false ? (
-          <QuranDownloadScreen
-            onClose={() => setQuranMode("listening")}
-            onDownloaded={() => setIsQuranDownloaded(true)}
-          />
-        ) : (
-          <QuranReadingGatewayScreen
-            onReadSurah={handleReadSurah}
+        <div
+          className={
+            currentScreen === "reciters" ? "block w-full" : "hidden"
+          }
+        >
+          <QuranRecitersScreen
+            onSelectReciter={handleSelectReciter}
+            playingSurahId={playingSurahId}
+            isPlaying={isPlaying}
+            onTogglePlay={handleTogglePlay}
+            onOpenPlayer={() => setIsPlayerOpen(true)}
+            onClosePlayer={() => setPlayingSurahId(null)}
+            selectedReciter={selectedReciter}
+            selectedMoshaf={selectedMoshaf}
+            audioRef={audioRef}
+            currentPlayingRadio={currentPlayingRadio}
+            onPlayRadio={playRadio}
+            onPauseRadio={pauseRadio}
             onModeChange={setQuranMode}
           />
-        )}
+        </div>
+
+        <div
+          className={currentScreen === "surahs" ? "block w-full" : "hidden"}
+        >
+          {selectedReciter && selectedMoshaf && (
+            <QuranSurahsScreen
+              reciter={selectedReciter}
+              moshaf={selectedMoshaf}
+              onBack={handleBackToReciters}
+              onPlaySurah={playSurah}
+              currentlyPlayingId={playingSurahId || undefined}
+              isPlaying={isPlaying}
+              onTriggerTimer={handleOpenTimerSheet}
+              onReadSurah={() => {}}
+            />
+          )}
+        </div>
       </div>
 
       {/* Full screen audio player overlay (slides up immediately on top) */}
@@ -583,10 +544,7 @@ const QuranTabScreen = React.memo(function QuranTabScreen({
                 onSetRepeatMode={setRepeatMode}
                 playlist={playlist}
                 onPlaySurah={playSurah}
-                onOpenReader={() => {
-                  setReadingSurahId(playingSurahId);
-                  setIsPlayerOpen(false);
-                }}
+                onOpenReader={() => {}}
               />
             </motion.div>
           )}
@@ -706,46 +664,7 @@ const QuranTabScreen = React.memo(function QuranTabScreen({
         )}
       </AnimatePresence>
 
-      {/* Full screen Quran Reader overlay (slides up immediately on top) */}
-      <AnimatePresence>
-        {readingSurahId !== null && (
-          <motion.div
-            key="reader-screen"
-            initial={{ opacity: 0, y: "100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 280 }}
-            className="fixed inset-0 z-50 bg-[#f7f2ea] overflow-hidden"
-          >
-            <QuranReaderScreen
-              surahId={readingSurahId}
-              initialPage={readingInitialPage}
-              onClose={() => {
-                setReadingSurahId(null);
-                setReadingInitialPage(undefined);
-              }}
-              onPlayAudio={(id) => {
-                // If it's already the active playing surah, toggle play, otherwise start playing it!
-                if (playingSurahId === id) {
-                  handleTogglePlay();
-                } else {
-                  // Generate Surah list for playing
-                  const { selectedMoshaf: moshaf } = stateRef.current;
-                  if (moshaf) {
-                    const surahList = moshaf.surah_list
-                      .split(",")
-                      .map(Number)
-                      .filter((id) => !isNaN(id) && id > 0);
-                    playSurah(id, surahList);
-                  }
-                }
-              }}
-              isPlaying={isPlaying && playingSurahId === readingSurahId}
-              onTogglePlay={handleTogglePlay}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+
     </div>
   );
 });
