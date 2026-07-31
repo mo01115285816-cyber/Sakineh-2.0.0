@@ -226,6 +226,8 @@ export function QuranAudioPlayerScreen({
     { id: 4, name: 'مطر', src: '/videos/5.mp4' },
     { id: 5, name: 'نهر', src: '/videos/6.mp4' },
     { id: 6, name: 'بحر', src: '/videos/7.mp4' },
+    { id: 7, name: 'فجر', src: '/videos/8.mp4' },
+    { id: 8, name: 'طبيعة', src: '/videos/9.mp4' },
   ];
 
   const [bgVideoIndex, setBgVideoIndex] = useState<number | null>(() => {
@@ -412,11 +414,11 @@ export function QuranAudioPlayerScreen({
                   </h3>
                 </div>
 
-                {/* Video Options Grid (Fits all 7 items without scrolling) */}
-                <div className="grid grid-cols-2 gap-2">
+                {/* Video Options Grid */}
+                <div className="grid grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto custom-scrollbar pr-0.5">
                   {BG_VIDEOS.map((video) => {
                     const isSelected = bgVideoIndex === video.id;
-                    const isLastOdd = video.id === 6;
+                    const isLastOdd = BG_VIDEOS.length % 2 !== 0 && video.id === BG_VIDEOS.length - 1;
                     return (
                       <button
                         key={video.id}
